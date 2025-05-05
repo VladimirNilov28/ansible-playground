@@ -1,0 +1,5 @@
+- name: Ping Web Services
+  hosts: webservice
+  tasks:
+   - name: Ping my hosts
+     ansible.builtin.ping:
