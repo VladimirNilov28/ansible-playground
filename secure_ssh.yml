@@ -1,0 +1,25 @@
+- name: Настройка SSH ключа и отключение входа по паролю
+  hosts: webservice           # Хосты
+  become: true                # Доступ для работы от имени рута
+
+  tasks:
+    - name: Добавляем публичный ключ в authorized_keys
+      ansible.posix.authorized_key:
+        user: root
+        key: "{{ ssh_pub_key }}"           # Достаём публичный ключ из переменных inventory
+        state: present                     # Убедимся, что он есть в authorized_keys
+
+    - name: Запрет на вход по паролю
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config         # Конфигурационный файл SSH
+        regexp: '^PasswordAuthentication'  # Найдёт строку, если есть
+        line: 'PasswordAuthentication no'  # Заменим или добавим строку
+        state: present
+        backup: yes                        # Сделает бэкап перед изменением
+
+    - name: Перезапускаем SSH
+      ansible.builtin.service:
+        name: sshd
+        state: restarted                   # Перезапуск службы SSH
+
+      
